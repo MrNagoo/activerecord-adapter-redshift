@@ -21,13 +21,13 @@ module ActiveRecord
       end
 
       def create(connection_already_established = false)
-        establish_connection(configuration_hash.merge(schema_search_path: "public")) unless connection_already_established
+        establish_connection(admin_connection_config) unless connection_already_established
         connection.create_database(db_config.database, configuration_hash.merge(encoding: encoding))
         establish_connection
       end
 
       def drop
-        establish_connection(configuration_hash.merge(schema_search_path: "public"))
+        establish_connection(admin_connection_config)
         connection.drop_database(db_config.database)
       end
 
@@ -99,6 +99,13 @@ module ActiveRecord
 
         def encoding
           configuration_hash[:encoding] || DEFAULT_ENCODING
+        end
+
+        def admin_connection_config
+          # Use configured schema_search_path if present, otherwise default to "public"
+          config = configuration_hash.dup
+          config[:schema_search_path] ||= "public"
+          config
         end
 
         def psql_env
