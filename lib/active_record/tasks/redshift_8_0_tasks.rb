@@ -21,13 +21,13 @@ module ActiveRecord
       end
 
       def create(connection_already_established = false)
-        establish_connection(public_schema_config) unless connection_already_established
+        establish_connection(configuration_hash.merge(schema_search_path: "public")) unless connection_already_established
         connection.create_database(db_config.database, configuration_hash.merge(encoding: encoding))
         establish_connection
       end
 
       def drop
-        establish_connection(public_schema_config)
+        establish_connection(configuration_hash.merge(schema_search_path: "public"))
         connection.drop_database(db_config.database)
       end
 
@@ -99,10 +99,6 @@ module ActiveRecord
 
         def encoding
           configuration_hash[:encoding] || DEFAULT_ENCODING
-        end
-
-        def public_schema_config
-          configuration_hash.merge(database: "redshift", schema_search_path: "public")
         end
 
         def psql_env
