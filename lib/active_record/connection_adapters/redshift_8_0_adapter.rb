@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+puts "[Redshift Adapter] Successfully loading Rails 8.0 adapter implementation"
+
 require 'active_record/connection_adapters/abstract_adapter'
 require 'active_record/connection_adapters/statement_pool'
 
