@@ -181,6 +181,16 @@ module ActiveRecord
         conn_params[:user] = conn_params.delete(:username) if conn_params[:username]
         conn_params[:dbname] = conn_params.delete(:database) if conn_params[:database]
 
+        # For Redshift, ensure SSL mode doesn't require client certificates
+        # unless explicitly configured. This handles pg gem 1.5+ behavior.
+        if conn_params[:sslmode].nil? || conn_params[:sslmode] == 'require'
+          conn_params[:sslmode] = 'require'
+          # Remove client cert params if not explicitly set to avoid pg gem trying to load them
+          conn_params.delete(:sslcert) unless @config.key?(:sslcert)
+          conn_params.delete(:sslkey) unless @config.key?(:sslkey)
+          conn_params.delete(:sslrootcert) unless @config.key?(:sslrootcert)
+        end
+
         # Forward only valid config params to PG::Connection.connect.
         conn_params.slice!(*RS_VALID_CONN_PARAMS)
 
