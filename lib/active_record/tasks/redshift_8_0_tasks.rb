@@ -21,14 +21,17 @@ module ActiveRecord
       end
 
       def create(connection_already_established = false)
-        establish_connection(public_schema_config) unless connection_already_established
-        connection.create_database(db_config.database, configuration_hash.merge(encoding: encoding))
-        establish_connection
+        # Redshift databases cannot be created via SQL like PostgreSQL
+        # They must be created through AWS Console/API
+        # This is a no-op for Redshift
+        $stdout.puts "Skipping Redshift database creation for '#{db_config.database}' (must be managed via AWS)"
       end
 
       def drop
-        establish_connection(public_schema_config)
-        connection.drop_database(db_config.database)
+        # Redshift databases should not be dropped via Rails
+        # They should be managed through AWS Console/API
+        $stderr.puts "WARNING: Cannot drop Redshift database '#{db_config.database}' via Rails."
+        $stderr.puts "Redshift databases must be managed through the AWS Console or API."
       end
 
       def charset
