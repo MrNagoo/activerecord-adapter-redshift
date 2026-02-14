@@ -102,7 +102,20 @@ module ActiveRecord
         end
 
         def public_schema_config
-          configuration_hash.merge(database: "redshift", schema_search_path: "public")
+          # In Rails 8, we need to ensure the adapter is explicitly set
+          # when creating a new config hash for connection
+          merged_config = configuration_hash.merge(
+            database: "redshift",
+            schema_search_path: "public",
+            adapter: "redshift"  # Explicitly set adapter for Rails 8
+          )
+
+          # Create a new DatabaseConfiguration object to ensure proper adapter resolution
+          ActiveRecord::DatabaseConfigurations::HashConfig.new(
+            db_config.env_name,
+            "#{db_config.name}_public",
+            merged_config
+          )
         end
 
         def psql_env
